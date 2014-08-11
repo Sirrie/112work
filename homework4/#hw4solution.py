@@ -34,18 +34,19 @@ def unboundedNumberGuessing(n):
 
 def BS(lB,UB,n,sign):
 	s=""
-	while (lB<UB):
+	while (lB<=UB):
 		mid=(lB+UB)/2
 		if mid == n:
 			s+=",%d" %mid
 			return s
 		elif mid >n:
 			s+=",%d" %mid
-			UB=mid
+			UB=mid-1
 		else:
 			s+=",%d" %mid
 			lB=mid +1
 	return s
+print BS(0,89,45,1)
 print unboundedNumberGuessing(0)
 print unboundedNumberGuessing(42)
 

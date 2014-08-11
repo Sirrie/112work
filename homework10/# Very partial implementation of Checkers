@@ -1,0 +1,85 @@
+# Very partial implementation of Checkers
+# using our BoardGame class.
+
+from Tkinter import *
+from BoardGame import BoardGame
+
+class Checkers(BoardGame):
+    def drawPlayersTurn(self):
+        # copied from Othello...  Maybe this belongs in BoardGame?
+        msg = "Player:"
+        self.canvas.create_text(self.boardMargin, self.titleMargin/2, text=msg, font=self.playersTurnFont, anchor=W)
+        r = self.boardMargin
+        cx = self.boardMargin+60 # magic number...
+        cy = self.titleMargin/2
+        color = self.cellColors[self.currentPlayer]
+        self.canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill=color)
+
+    def redrawAll(self):
+        super(Checkers, self).redrawAll()
+        if (self.errMsg != None):
+            self.canvas.create_text(self.width/2, self.height/2, text=self.errMsg,
+                                    font=self.errFont, fill=self.errColor)
+
+    def cellPressed(self, row, col):
+        self.errMsg = None
+        if (self.selection == None):
+            if (self.board[row][col] == self.currentPlayer):
+                self.selection = (row, col)
+            elif (self.board[row][col] == 0):
+                self.errMsg = "Select the piece to move!"
+            else:
+                self.errMsg = "Wrong player!"
+        elif (self.board[row][col] != 0):
+            self.errMsg = "You cannot move to an occupied cell!"
+        else:
+            # there is a selection, so this is an attempted move
+            (row0, col0) = self.selection
+            (drow, dcol) = (abs(row-row0), abs(col-col0))
+            (row1, col1) = ((row0+row)/2, (col0+col)/2)
+            legalMove = False
+            if ((drow == 1) and (dcol == 1)):
+                # move one step away
+                legalMove = True
+            elif ((drow == 2) and (dcol == 2) and
+                  (self.board[row1][col1] != 0) and
+                  (self.board[row1][col1] != self.currentPlayer)):
+                # move two steps away, "jump" another player
+                legalMove = True
+                self.board[row1][col1] = 0
+            if (legalMove):
+                self.board[row][col] = self.currentPlayer
+                self.board[row0][col0] = 0
+                self.changePlayers()
+            else:
+                self.errMsg = "You cannot move there!"
+            self.selection = None
+
+    def drawCellContents(self, row, col, bounds):
+        if (self.selection == (row,col)):
+            self.cellBackgroundColor = self.selectedCellBackgroundColor
+        else:
+            self.cellBackgroundColor = self.cellBackgroundColors[1+(row+col)%2]
+        super(Checkers, self).drawCellContents(row, col, bounds)
+
+    def init(self):
+        for row in xrange(3):
+            for col in xrange(row%2, self.cols, 2):
+                self.board[row][col] = 1
+        for row in xrange(self.rows-3, self.rows):
+            for col in xrange(row%2, self.cols, 2):
+                self.board[row][col] = 2
+        self.selection = None
+        self.cellColors = [None, "yellow", "purple"]
+        self.cellBackgroundColors = [None, "white", "cyan"]
+        self.selectedCellBackgroundColor = "green"
+        self.errMsg = None
+        self.errFont = "Arial 14 bold"
+        self.errColor = "red"
+
+    def __init__(self):
+        title = "Checkers"
+        super(Checkers, self).__init__(title, 8, 8, 50)
+
+game = Checkers()
+game.run()

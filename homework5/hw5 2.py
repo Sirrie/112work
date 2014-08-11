@@ -23,7 +23,7 @@ def f2(a):
     i = a.index(b[1])
     return (b[1:6:2] == a[i:i+3])
      b is a non-destructive copy of a, so we find las b1,b3,b5==a[i:i+3];
-     so we find that len(b)=len(a), we also find that if b is [1,2,3,4,5,6], because i=1 a can be [1,2,4,6,3,5]
+     so we find that len(b)=len(a), we also find that if b is [1,2,3,4,5,6], because i=1 a can be [0,2,4,1,3,5]
 
 
 
@@ -89,13 +89,19 @@ def dotProduct(a,b):
 #
 
 def solvesCryptarithm(puzzle,solution):
-	checkPuzzle=dividePuzzle(puzzle)
-	puzzleLength  =3
-	checkPuzzleInt=[]
+    checkPuzzle=dividePuzzle(puzzle)
+    puzzleLength  =3
+    checkPuzzleInt=[]
 	# first devide the puzzle into different parts 
-	for i in xrange(puzzleLength):
-		checkPuzzleInt.append(trans2Digit(checkPuzzle[i],solution))
-	# then deCryptarith the puzzle into different int 
+    for i in xrange(puzzleLength):
+        temp=trans2Digit(checkPuzzle[i],solution)
+        if trans2Digit==None:
+            return False
+        else:
+            checkPuzzleInt.append(temp)
+		#checkPuzzleInt.append(trans2Digit(checkPuzzle[i],solution))
+	
+    # then deCryptarith the puzzle into different int 
 	# then check the result whether can be the sum of the intA and intB can be  the sum of the result of intC
 	intA =checkPuzzleInt[0]
 	intB =checkPuzzleInt[1]
@@ -117,21 +123,23 @@ def dividePuzzle(puzzle):
 		elif c=="=":
 			isB=False
 			isC=True
-		elif isA:
-			stringA+=c
-		elif isB:
-			stringB+=c
-		elif isC:
-			stringC+=c
+		elif isA: stringA+=c
+		elif isB: stringB+=c
+		elif isC: stringC+=c
 	return [stringA,stringB,stringC]
 
 # translate a string by referring to solution to an integer
 def trans2Digit(str,solution):
-	result=[]
-	for c in str:
-		result.append(searchDigit(c,solution))
-	result="".join(result)
-	return int(result)
+    result=[]
+    for c in str:
+        result.append(searchDigit(c,solution))
+    result="".join(result)
+    try: 
+        result=int(result)
+    except:
+        result=None
+    return result
+
 
 # search through the solution and find the int of the character
 def searchDigit(c,solution):
@@ -172,8 +180,87 @@ def dotProduct(a,b):
 
 
 
+def verticalDistance(x,a,b):
+    yLine=[]
+    for c in x:
+        yLine.append(c*a+b)
+    return yLine
+
+def computeMean(slt):
+    result=0;
+    for c in slt:
+        result+=int(c)
+    return result/float(len(slt))
+
+def computeSS(x,y):
+    result=0
+    xMean=computeMean(x)
+    yMean=computeMean(y)
+    for i in range(len(x)):
+        result+=(int(x[i])-xMean)*(int(y[i])-xMean)
+    return result
+
+def computeSS2(x,y):
+    result=0
+    for i in range(len(x)):
+        result+=(x[i]-y[i])**2
+    return result
+
+def linearRegression(slt):
+    (x,y) = zip(*slt)
+    xMean = computeMean(x)
+    yMean = computeMean(y)
+    SSxx  = computeSS(x,x)       
+    SSxy  = computeSS(x,y)
+    a     =SSxy/float(SSxx)   
+    b     =yMean-a*xMean 
+    yLine =verticalDistance(x,a,b) 
+    SSdev =computeSS(y,y)
+    SSres =computeSS2(y,yLine)
+    r     =((SSdev-SSres)/float(SSdev))**0.5
+    return (a,b,r)
 
 
+def bestScrabbleScore(dictionary,letterScores,hand):
+    worldList=dictionaryMatch(dictionary,hand)
+    if len(worldList)==0:return None
+    (maxWord,maxScore)=computeMaixScore(wordlist,letterScores)
+    return (maxWord,maxScore)    
+
+def dictionaryMatch(dictionary,hand):
+    wordList=[];
+    for word in dictionary:
+        if isWordMatch(hand,word):
+            wordList.append(word)
+    return wordList
+              
+
+#helper function to determine whether we will have that wor 
+#that can be formed from characters in hand
+def isWordMatch(srcWord,targetWord):
+    #join the hand list
+    srcWord="".join(srcWord)
+    if len(srcWord) < len(targetWord):
+        return False
+    for c in targetWord:
+        if targetWord.count(c)>srcWord.count(c):
+            return False
+    return True
+ # compute the
+def computeMaixScore(wordList,letterScores):
+    maxScore=0
+    maxWord=[]
+    for word in wordList:
+        wordScore=0
+        for c in word:
+            wordScore+=letterScores[ord(c)-ord('a')]
+        if wordScore>maxScore:
+            maxScore=wordScore
+            maxWord=[]# clean all the elements in the list
+            maxWord.append(word)
+        elif wordScore==maxScore:
+            maxWord.append(word)
+    return (maxWord,maxScore)
 
 ######################################################################
 ##### ignore_rest: The autograder will ignore all code below here ####
@@ -181,12 +268,52 @@ def dotProduct(a,b):
 
 
 def testsolveCryptarithm():
-	print "test Cryptarithm......"
-	assert(solvesCryptarithm("SEND+MORE=MONEY","OMY--ENDRS")==True)
+    print "test Cryptarithm......"
+    assert(solvesCryptarithm("SEND+MORE=MONEY","OMY--ENDRS")==True)
+    assert(solvesCryptarithm("B+B=C","ABC")==True)
+    print solvesCryptarithm('EAT+THAT=APPLE', '-AHL----ET')
+    print solvesCryptarithm('CROSS+ROADS=DANGER', '-DOSEA-GNC')
+    print "Passed................"
 
-	print "Passed........."
+def testtran2Digit():
+    print "test trans2Digit......."
+    assert(trans2Digit("ABC","ABC")==12)
+    assert(trans2Digit("BCS","CSB")==201)
+    print "Passed................"
+
+def testMean():
+    print "test mean......."
+    assert(computeMean([1,2,3,4])==2.5)
+    assert(computeMean([4,56,6])==22)
+    print "Passed..............."
+
+def testComputeSS():
+    print " test computeSS.,,,,"
+
+    assert(computeSS([1,2,3],[1,1,1])==0)
+    assert(almostEqual(computeSS([2,9,6],[1,1,3]),0.666666667)==True)
+    print "Passsed.........."
+
+def testComputeSS2():
+    print"test computeSS2......"
+    assert(computeSS2([2,9,6],1)==90)
+    assert(computeSS2([1,1,3],4)==19)
+    print "Passed ............"
+
 
 def almostEqual(x,y):
-	epilon=0.00001
+	epsilon=0.00001
 	return abs(x-y)<epsilon
+
+def testAll():
+    testsolveCryptarithm()
+    testtran2Digit()
+    testMean()
+    testComputeSS()
+
+def main():
+    testAll()
+
+if __name__ == "__main__":
+    main()
 
