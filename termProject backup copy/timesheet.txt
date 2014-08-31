@@ -1,0 +1,15 @@
+timesheet.txt
+April 8th: 2 hours searching for the typical idea and talked with maddy about a feasible incremental implementable design for the whole term project.
+
+April 9th: preparing for the OpenCV part and designed for the whole game
+
+April 10th: decide to make module work
+
+April 13th: 4 hours to learn OpenCV 
+
+April 14th: 6 hours to install pygame and OpenCV on MAC
+
+April 15th: 6 hours to learn OpenCV
+
+April 16th: 3 hours to figure out the final goal of the termproject to do a game and us OpenCV to control it
+
